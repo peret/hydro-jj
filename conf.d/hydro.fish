@@ -7,7 +7,7 @@ function $_hydro_git --on-variable $_hydro_git
 end
 
 function _hydro_pwd --on-variable PWD --on-variable hydro_ignored_git_paths --on-variable fish_prompt_pwd_dir_length
-    set --local git_root (command git --no-optional-locks rev-parse --show-toplevel 2>/dev/null)
+    set --local git_root (command jj --ignore-working-copy workspace root --color never 2>/dev/null)
     set --local git_base (string replace --all --regex -- "^.*/" "" "$git_root")
     set --local path_sep /
 
@@ -67,10 +67,7 @@ function _hydro_prompt --on-event fish_prompt
 
     fish --private --command "
         set branch (
-            command git branch --show-current 2>/dev/null ||
-            command git describe --tags --exact-match HEAD 2>/dev/null ||
-            command git rev-parse --short HEAD 2>/dev/null |
-                string replace --regex -- '(.+)' '@\$1'
+            command jj show -r 'heads(::@ & bookmarks())' --template 'self.local_bookmarks()' --no-patch --color never --ignore-working-copy 2>/dev/null
         )
 
         test -z \"\$$_hydro_git\" && set --universal $_hydro_git \"\$branch \"
